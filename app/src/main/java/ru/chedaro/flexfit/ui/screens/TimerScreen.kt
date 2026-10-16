@@ -136,11 +136,14 @@ private fun TimerDial(
         animationSpec = tween(durationMillis = 950),
         label = "sweep"
     )
+    // Значения темы читаем ДО Canvas: внутри DrawScope (@Composable вызовы недоступны)
+    val dialBackground = MaterialTheme.colorScheme.surfaceVariant
+    val dialTrack = MaterialTheme.colorScheme.outlineVariant
 
     Box(
         modifier = Modifier
             .size(280.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+            .background(dialBackground, CircleShape)
             .pointerInput(Unit) { detectTapGestures { onClick() } },
         contentAlignment = Alignment.Center
     ) {
@@ -148,7 +151,7 @@ private fun TimerDial(
             val stroke = 14.dp.toPx()
             val diameter = size.minDimension - stroke
             val topLeft = Offset((size.width - diameter) / 2f, (size.height - diameter) / 2f)
-            val trackColor = MaterialTheme.colorScheme.outlineVariant
+            val trackColor = dialTrack
 
             drawArc(
                 color = trackColor,

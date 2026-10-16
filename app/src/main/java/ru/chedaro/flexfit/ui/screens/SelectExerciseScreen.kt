@@ -1,5 +1,6 @@
 package ru.chedaro.flexfit.ui.screens
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,7 +38,7 @@ fun SelectExerciseScreen(
             ExerciseListView(
                 exercises = data.exercises,
                 asCards = data.settings.showAsCards,
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                contentPadding = PaddingValues(16.dp),
                 onClick = { exercise -> onPicked(exercise.id) },
                 onLongPress = { exercise -> pendingDelete = exercise.id }
             )

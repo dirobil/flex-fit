@@ -1,5 +1,6 @@
 package ru.chedaro.flexfit.ui.screens
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -181,7 +182,7 @@ private fun ExerciseBarChart(
     modifier: Modifier = Modifier
 ) {
     if (exercises.isEmpty()) {
-        EmptyPlaceholder(androidx.compose.foundation.layout.PaddingValues(), "Нет упражнений для анализа")
+        EmptyPlaceholder(PaddingValues(), "Нет упражнений для анализа")
         return
     }
 
