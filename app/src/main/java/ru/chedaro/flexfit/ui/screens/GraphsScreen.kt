@@ -43,6 +43,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.chedaro.flexfit.data.EntryType
@@ -321,19 +322,37 @@ private fun ExerciseBarChart(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        BarChart(
-            values = (1..currentMonth.lengthOfMonth()).map { day ->
-                perDay[currentMonth.atDay(day).toEpochDay()] ?: 0
-            },
-            barColor = MaterialTheme.colorScheme.primary,
-            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            valueFormatter = { v -> formatMetric(metric, v) },
+        // Горизонтальная прокрутка: содержимое шире экрана — график можно
+        // двигать пальцем; если умещается — центрируется от левого края.
+        val chartValues = (1..currentMonth.lengthOfMonth()).map { day ->
+            perDay[currentMonth.atDay(day).toEpochDay()] ?: 0
+        }
+        val minSlotPx = with(LocalDensity.current) { 26.dp.toPx() }
+        val contentWidthDp = with(LocalDensity.current) {
+            ((44.dp.toPx() + chartValues.size * minSlotPx + 8.dp.toPx()).toDp())
+        }
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(260.dp)
-                .horizontalScroll(rememberScrollState())
-        )
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(max(contentWidthDp, 300.dp))
+                    .fillMaxHeight()
+            ) {
+                BarChart(
+                    values = chartValues,
+                    barColor = MaterialTheme.colorScheme.primary,
+                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                    valueFormatter = { v -> formatMetric(metric, v) },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
 
         Text(text = trendText, style = MaterialTheme.typography.bodyLarge)
         Text(
