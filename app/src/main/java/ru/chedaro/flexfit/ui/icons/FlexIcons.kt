@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.dp
 
 /**
@@ -89,12 +90,22 @@ private class IconSpecBuilder {
 private data class PathSpec(val pathData: String, val stroke: Boolean)
 
 /**
- * Минимальная фабрика ImageVector: добавляет каждый path'ы отдельным
- * `addPath` (заливка или штрих) в viewport 24x24. Заливка — NonZero,
- * чтобы фигуры с «дырками» (например, циферблат часов) рисовались корректно.
+ * Минимальная фабрика ImageVector.
+ *
+ * В текущем compose-BOM у `ImageVector.Builder.addPath` больше нет
+ * overload'а со строкой `pathData` — есть только `addPath(List<PathNode>)`,
+ * куда Kotlin не может подставить String (это и была ошибка компиляции).
+ * Поэтому path-данные Material Design парсятся нативным
+ * `androidx.compose.ui.graphics.vector.PathParser` в `List<PathNode>`
+ * и передаются в nodes-перегрузку. Сторонних библиотек не используется.
+ *
+ * Заливка — NonZero, чтобы фигуры с «дырками» (циферблат часов)
+ * рисовались корректно. Штриховые path'ы идут с прозрачной заливкой и
+ * чёрным штрихом; итоговый цвет подменяется tint'ом на уровне `Icon()`.
  */
 private fun buildIcon(name: String, builder: IconSpecBuilder.() -> Unit): ImageVector {
     val specs = IconSpecBuilder().apply(builder).specs
+    val parser = PathParser()
     return ImageVector.Builder(
         name = name,
         defaultWidth = 24.dp,
@@ -104,7 +115,7 @@ private fun buildIcon(name: String, builder: IconSpecBuilder.() -> Unit): ImageV
     ).apply {
         specs.forEach { spec ->
             addPath(
-                pathData = spec.pathData,
+                path = parser.parseToPathNodes(spec.pathData),
                 fill = if (spec.stroke) SolidColor(Color.Transparent) else SolidColor(Color.Black),
                 fillAlpha = 1f,
                 stroke = if (spec.stroke) SolidColor(Color.Black) else null,
@@ -113,7 +124,7 @@ private fun buildIcon(name: String, builder: IconSpecBuilder.() -> Unit): ImageV
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round,
                 strokeLineMiter = 1f,
-                pathFillType = PathFillType.NonZero
+                fillRule = PathFillType.NonZero
             )
         }
     }.build()
