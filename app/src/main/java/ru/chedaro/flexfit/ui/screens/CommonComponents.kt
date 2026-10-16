@@ -3,6 +3,7 @@ package ru.chedaro.flexfit.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,7 +30,7 @@ import androidx.compose.ui.unit.dp
 fun ScreenScaffold(
     title: String,
     onBack: () -> Unit,
-    actions: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(

@@ -89,12 +89,12 @@ private class IconSpecBuilder {
 private data class PathSpec(val pathData: String, val stroke: Boolean)
 
 /**
- * Минимальная фабрика ImageVector: складывает path'ы (заливка или штрих)
- * в viewport 24x24. Заливка — NonZero, чтобы фигуры с «дырками»
- * (например, циферблат часов) рисовались корректно.
+ * Минимальная фабрика ImageVector: добавляет каждый path'ы отдельным
+ * `addPath` (заливка или штрих) в viewport 24x24. Заливка — NonZero,
+ * чтобы фигуры с «дырками» (например, циферблат часов) рисовались корректно.
  */
 private fun buildIcon(name: String, builder: IconSpecBuilder.() -> Unit): ImageVector {
-    val spec = IconSpecBuilder().apply(builder).specs
+    val specs = IconSpecBuilder().apply(builder).specs
     return ImageVector.Builder(
         name = name,
         defaultWidth = 24.dp,
@@ -102,17 +102,19 @@ private fun buildIcon(name: String, builder: IconSpecBuilder.() -> Unit): ImageV
         viewportWidth = 24f,
         viewportHeight = 24f
     ).apply {
-        addPath(
-            pathData = spec.joinToString(" ") { it.pathData },
-            fill = if (spec.any { !it.stroke }) SolidColor(Color.Black) else SolidColor(Color.Transparent),
-            fillAlpha = 1f,
-            stroke = if (spec.any { it.stroke }) SolidColor(Color.Black) else null,
-            strokeAlpha = 1f,
-            strokeLineWidth = 2f,
-            strokeLineCap = StrokeCap.Round,
-            strokeLineJoin = StrokeJoin.Round,
-            strokeLineMiter = 1f,
-            pathFillType = PathFillType.NonZero
-        )
+        specs.forEach { spec ->
+            addPath(
+                pathData = spec.pathData,
+                fill = if (spec.stroke) SolidColor(Color.Transparent) else SolidColor(Color.Black),
+                fillAlpha = 1f,
+                stroke = if (spec.stroke) SolidColor(Color.Black) else null,
+                strokeAlpha = 1f,
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round,
+                strokeLineMiter = 1f,
+                pathFillType = PathFillType.NonZero
+            )
+        }
     }.build()
 }
