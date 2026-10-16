@@ -1,5 +1,6 @@
 package ru.chedaro.flexfit.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
@@ -8,16 +9,23 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -60,6 +68,9 @@ fun ExerciseDetailScreen(
         ) {
             var nameText by remember(exercise.id) { mutableStateOf(exercise.name) }
             var stepText by remember(exercise.id) { mutableStateOf(exercise.stepPerTap.toString()) }
+            // Режим удаления записей истории (как в окне выбора записей).
+            var deleteMode by remember { mutableStateOf(false) }
+            var showClearAllDialog by remember { mutableStateOf(false) }
 
             val history = data.logs
                 .filter { it.exerciseId == exercise.id }
@@ -112,36 +123,115 @@ fun ExerciseDetailScreen(
             }
 
             item {
-                Text(
-                    text = "История (${history.size})",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-
-            items(history, key = { it.id }) { log ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = if (log.type == EntryType.TIMER) {
-                            "%02d:%02d".format(log.value / 60, log.value % 60)
-                        } else log.value.toString(),
+                        text = "История (${history.size})",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f)
                     )
-                    Text(
-                        text = LocalDate.ofEpochDay(log.dateEpochDay).toString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    if (history.isNotEmpty()) {
+                        TextButton(onClick = { deleteMode = !deleteMode }) {
+                            Text(if (deleteMode) "Готово" else "Удалить")
+                        }
+                    }
+                }
+            }
+
+            items(history, key = { it.id }) { log ->
+                val timeText = if (log.type == EntryType.TIMER) {
+                    "%02d:%02d".format(log.value / 60, log.value % 60)
+                } else log.value.toString()
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                        .then(
+                            if (deleteMode) {
+                                Modifier.clickable { FlexRepository.deleteLog(log.id) }
+                            } else {
+                                Modifier
+                            }
+                        ),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (deleteMode) {
+                            MaterialTheme.colorScheme.errorContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        }
                     )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (deleteMode) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Удалить запись",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Text(
+                            text = timeText,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = LocalDate.ofEpochDay(log.dateEpochDay).toString(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (deleteMode && history.isNotEmpty()) {
+                item {
+                    Button(
+                        onClick = { showClearAllDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        )
+                    ) { Text("Очистить всю историю") }
                 }
             }
             }
+        }
+
+        if (showClearAllDialog) {
+            AlertDialog(
+                onDismissRequest = { showClearAllDialog = false },
+                title = { Text("Очистить историю?") },
+                text = { Text("Будут удалены все записи упражнения «${exercise.name}». Это действие необратимо.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            history.forEach { FlexRepository.deleteLog(it.id) }
+                            showClearAllDialog = false
+                            deleteMode = false
+                        }
+                    ) { Text("Удалить всё") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearAllDialog = false }) { Text("Отмена") }
+                }
+            )
         }
     }
 }

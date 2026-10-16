@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
@@ -172,7 +173,13 @@ private fun GapSpacer() {
     Spacer(modifier = Modifier.size(4.dp, 1.dp))
 }
 
-// ---------- Идея 2: повторения по дням + сравнение с прошлым месяцем ----------
+// ---------- Идея 2: повторения/время по дням + сравнение с прошлым месяцем ----------
+
+/** Что показывать на графике: количество повторений или затраченное время. */
+private enum class Metric(val label: String) {
+    REPS("Повторения"),
+    TIME("Время")
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -187,16 +194,25 @@ private fun ExerciseBarChart(
     }
 
     var expanded by remember { mutableStateOf(false) }
+    var metricExpanded by remember { mutableStateOf(false) }
     var selectedId by remember { mutableStateOf(exercises.first().id) }
+    var metric by remember { mutableStateOf(Metric.REPS) }
     val selected = exercises.firstOrNull { it.id == selectedId } ?: exercises.first()
 
     val currentMonth = YearMonth.now()
     val previousMonth = currentMonth.minusMonths(1)
 
-    val perDay: Map<Long, Int> = remember(logs, selected.id) {
+    // Значение записи в выбранной метрике: секунды таймера не учитываются в повторениях,
+    // а нажатия/ввод — во времени.
+    fun metricValue(log: ru.chedaro.flexfit.data.LogEntry): Int = when (metric) {
+        Metric.REPS -> if (log.type == EntryType.TAPS) log.value else 0
+        Metric.TIME -> if (log.type == EntryType.TIMER) log.value else 0
+    }
+
+    val perDay: Map<Long, Int> = remember(logs, selected.id, metric) {
         logs.filter { it.exerciseId == selected.id }
             .groupBy { it.dateEpochDay }
-            .mapValues { (_, list) -> list.sumOf { it.value } }
+            .mapValues { (_, list) -> list.sumOf { metricValue(it) } }
     }
 
     val currentTotal = perDay.filter { (day, _) ->
@@ -211,9 +227,9 @@ private fun ExerciseBarChart(
         previousTotal == 0 && currentTotal == 0 -> "Нет данных за эти месяцы"
         previousTotal == 0 -> "Новый рекорд! В прошлом месяце не было занятий"
         currentTotal >= previousTotal ->
-            "Больше, чем в ${previousMonth.monthValue} мес.: +${currentTotal - previousTotal} (+${percent(currentTotal, previousTotal)}%)"
+            "Больше, чем в ${previousMonth.monthValue} мес.: +${formatMetric(metric, currentTotal - previousTotal)} (+${percent(currentTotal, previousTotal)}%)"
         else ->
-            "Меньше, чем в ${previousMonth.monthValue} мес.: −${previousTotal - currentTotal}"
+            "Меньше, чем в ${previousMonth.monthValue} мес.: −${formatMetric(metric, previousTotal - currentTotal)}"
     }
 
     Column(
@@ -244,8 +260,36 @@ private fun ExerciseBarChart(
             }
         }
 
+        // Выбор метрики: повторения (таппер/ввод) или затраченное время (таймер).
+        ExposedDropdownMenuBox(expanded = metricExpanded, onExpandedChange = { metricExpanded = it }) {
+            OutlinedTextField(
+                value = metric.label,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Метрика") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(metricExpanded) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            )
+            ExposedDropdownMenu(
+                expanded = metricExpanded,
+                onDismissRequest = { metricExpanded = false }
+            ) {
+                Metric.entries.forEach { m ->
+                    DropdownMenuItem(
+                        text = { Text(m.label) },
+                        onClick = {
+                            metric = m
+                            metricExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
         Text(
-            text = "Повторения по дням (${currentMonth.monthValue}.${currentMonth.year})",
+            text = "${metric.label} по дням (${currentMonth.monthValue}.${currentMonth.year})",
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -262,12 +306,17 @@ private fun ExerciseBarChart(
 
         Text(text = trendText, style = MaterialTheme.typography.bodyLarge)
         Text(
-            text = "Текущий месяц: $currentTotal · Прошлый месяц: $previousTotal",
+            text = "Текущий месяц: ${formatMetric(metric, currentTotal)} · " +
+                    "Прошлый месяц: ${formatMetric(metric, previousTotal)}",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
+
+/** Форматирование значения под выбранную метрику: секунды — как mm:ss. */
+private fun formatMetric(metric: Metric, value: Int): String =
+    if (metric == Metric.TIME) "%02d:%02d".format(value / 60, value % 60) else value.toString()
 
 private fun percent(current: Int, previous: Int): Int =
     if (previous == 0) 0 else ((current - previous) * 100) / previous

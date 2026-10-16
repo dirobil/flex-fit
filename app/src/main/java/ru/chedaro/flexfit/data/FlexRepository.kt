@@ -131,6 +131,16 @@ object FlexRepository {
         }
     }
 
+    /** Удаляет одну запись из истории упражнения. */
+    fun deleteLog(logId: String) {
+        mutate { d -> d.copy(logs = d.logs.filter { it.id != logId }) }
+    }
+
+    /** Полностью очищает историю упражнений. */
+    fun clearLogs() {
+        mutate { d -> d.copy(logs = emptyList()) }
+    }
+
     fun setShowAsCards(cards: Boolean) {
         mutate { d -> d.copy(settings = d.settings.copy(showAsCards = cards)) }
     }
