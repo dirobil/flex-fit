@@ -99,6 +99,20 @@ object FlexRepository {
         mutate { d -> d.copy(savedTimerEntries = emptyList()) }
     }
 
+    /** Очистка только сохранённых интервалов таймера (кнопка «Сброс/Очистить» в окне Timer). */
+    fun clearTimerEntries() {
+        mutate { d ->
+            d.copy(savedTimerEntries = d.savedTimerEntries.filter { it.type != EntryType.TIMER })
+        }
+    }
+
+    /** Очистка только сохранённых значений нажатий (кнопка «Сброс/Очистить» в окне Tapper). */
+    fun clearTapsEntries() {
+        mutate { d ->
+            d.copy(savedTimerEntries = d.savedTimerEntries.filter { it.type != EntryType.TAPS })
+        }
+    }
+
     /** Записывает выполненное действие упражнения и удаляет использованную сохранённую запись. */
     fun logAction(entry: TimerEntry, exerciseId: String) {
         val value = if (entry.type == EntryType.TIMER) entry.seconds else entry.taps

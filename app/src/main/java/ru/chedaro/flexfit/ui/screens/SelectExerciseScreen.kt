@@ -1,7 +1,14 @@
 package ru.chedaro.flexfit.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +40,29 @@ fun SelectExerciseScreen(
 
     ScreenScaffold(title = "Выбор упражнения", onBack = onBack) { padding ->
         if (data.exercises.isEmpty()) {
-            EmptyPlaceholder(padding, "Сначала добавьте упражнения")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Список упражнений пуст",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        FlexRepository.addExercise("Приседания")
+                        FlexRepository.addExercise("Отжимания")
+                        FlexRepository.addExercise("Планка")
+                    },
+                    shape = RoundedCornerShape(16.dp)
+                ) { Text("Добавить упражнения") }
+            }
         } else {
             ExerciseListView(
                 exercises = data.exercises,

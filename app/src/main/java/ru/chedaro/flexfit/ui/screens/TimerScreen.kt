@@ -4,7 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -27,10 +28,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import ru.chedaro.flexfit.data.EntryType
 import ru.chedaro.flexfit.data.FlexRepository
 import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 
@@ -54,6 +55,7 @@ fun TimerScreen(
     onBack: () -> Unit,
     onOpenSelect: () -> Unit
 ) {
+    val data by FlexRepository.data.collectAsState()
     var elapsedSeconds by remember { mutableIntStateOf(0) }
     var isRunning by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableIntStateOf(0) }
@@ -69,6 +71,13 @@ fun TimerScreen(
     LaunchedEffect(elapsedSeconds) {
         if (elapsedSeconds > 0 && elapsedSeconds % 60 == 0) {
             colorIndex = (colorIndex + 1) % StripColors.size
+        }
+    }
+
+    // При возврате на экран после записи останавливаем таймер.
+    LaunchedEffect(data.savedTimerEntries.size) {
+        if (isRunning && data.savedTimerEntries.any { it.type == EntryType.TIMER }) {
+            isRunning = false
         }
     }
 
@@ -102,9 +111,13 @@ fun TimerScreen(
                 firstLabel = "Выбрать",
                 secondLabel = "Сброс/Очистить",
                 onFirst = {
-                    if (!isRunning && elapsedSeconds > 0) {
-                        FlexRepository.saveTimerSeconds(elapsedSeconds)
+                    // Если есть незакрытый интервал — сохраняем его как запись.
+                    if (elapsedSeconds > 0) {
+                        val seconds = elapsedSeconds
+                        isRunning = false
                         elapsedSeconds = 0
+                        colorIndex = 0
+                        FlexRepository.saveTimerSeconds(seconds)
                     }
                     onOpenSelect()
                 },
@@ -112,7 +125,7 @@ fun TimerScreen(
                     isRunning = false
                     elapsedSeconds = 0
                     colorIndex = 0
-                    FlexRepository.clearSavedEntries()
+                    FlexRepository.clearTimerEntries()
                 }
             )
         }
@@ -140,11 +153,18 @@ private fun TimerDial(
     val dialBackground = MaterialTheme.colorScheme.surfaceVariant
     val dialTrack = MaterialTheme.colorScheme.outlineVariant
 
+    val h = seconds / 3600
+    val m = (seconds % 3600) / 60
+    val s = seconds % 60
+    val timeText = "%02d:%02d:%02d".format(h, m, s)
+
+    // Вся поверхность циферблата — одна кнопка: клик в любой точке (включая центр
+    // поверх текста) гарантированно срабатывает.
     Box(
         modifier = Modifier
             .size(280.dp)
             .background(dialBackground, CircleShape)
-            .pointerInput(Unit) { detectTapGestures { onClick() } },
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -177,11 +197,8 @@ private fun TimerDial(
             }
         }
 
-        val h = seconds / 3600
-        val m = (seconds % 3600) / 60
-        val s = seconds % 60
         Text(
-            text = "%02d:%02d:%02d".format(h, m, s),
+            text = timeText,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
