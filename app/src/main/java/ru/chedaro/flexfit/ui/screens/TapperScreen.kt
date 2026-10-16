@@ -77,14 +77,11 @@ fun TapperScreen(
                     firstLabel = "Выбрать",
                     secondLabel = "Изменить",
                     onFirst = {
-                        // Сохраняем текущее число и открываем окно выбора упражнения
+                        // Сохраняем текущее число и открываем список записей
+                        // (оттуда — выбор упражнения). Единый путь для Таппера и Ввода.
                         val entryId = FlexRepository.saveTaps(taps)
-                        if (entryId != null) {
-                            taps = 0
-                            onOpenSelectExercise(entryId)
-                        } else {
-                            onOpenSelectEntries()
-                        }
+                        if (entryId != null) taps = 0
+                        onOpenSelectEntries()
                     },
                     onSecond = { showEditDialog = true }
                 )

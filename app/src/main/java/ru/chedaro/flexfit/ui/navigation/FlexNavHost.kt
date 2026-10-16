@@ -65,23 +65,20 @@ fun FlexNavHost(
         composable(Routes.TAPPER) {
             TapperScreen(
                 onBack = { navController.popBackStack() },
+                // Всегда через окно списка записей: там видно историю чисел,
+                // и она обновляется мгновенно после записи.
                 onOpenSelectEntries = { navController.navigate(Routes.selectEntry(EntryType.TAPS)) },
-                // Сохранённое число нажатий — сразу открываем выбор упражнения
-                onOpenSelectExercise = { entryId -> navController.navigate(Routes.selectExercise(entryId)) }
+                onOpenSelectExercise = { navController.navigate(Routes.selectEntry(EntryType.TAPS)) }
             )
         }
 
         composable(Routes.INPUT) {
             InputScreen(
                 onBack = { navController.popBackStack() },
-                // Сохраняем введённое число и сразу открываем окно выбора упражнения
+                // Единый путь как у Таппера: сохраняем число и открываем список записей.
                 onNumberConfirmed = { value ->
-                    val entryId = FlexRepository.saveTaps(value)
-                    if (entryId != null) {
-                        navController.navigate(Routes.selectExercise(entryId))
-                    } else {
-                        navController.navigate(Routes.selectEntry(EntryType.TAPS))
-                    }
+                    FlexRepository.saveTaps(value)
+                    navController.navigate(Routes.selectEntry(EntryType.TAPS))
                 }
             )
         }
@@ -91,7 +88,12 @@ fun FlexNavHost(
         }
 
         composable(Routes.EXERCISES) {
-            ExercisesScreen(onBack = { navController.popBackStack() })
+            ExercisesScreen(
+                onBack = { navController.popBackStack() },
+                onOpenDetail = { exerciseId ->
+                    navController.navigate(Routes.exerciseDetail(exerciseId))
+                }
+            )
         }
 
         composable(
@@ -119,10 +121,20 @@ fun FlexNavHost(
                     entry = entry,
                     onBack = { navController.popBackStack() },
                     onPicked = { exerciseId ->
+                        // Синхронно записываем значение в историю упражнения...
                         FlexRepository.logAction(entry, exerciseId)
-                        // Возвращаемся на экран, откуда открыли выбор (2 уровня назад)
-                        navController.previousBackStackEntry?.savedStateHandle["logged"] = true
-                        repeat(2) { navController.popBackStack() }
+                        // ...затем ОДИН popBackStack(): возвращаемся ровно на один
+                        // экран назад (список записей). Двойной pop здесь вызывал
+                        // гонку навигации и «белый экран» на Android 9.
+                        val popped = navController.popBackStack()
+                        if (!popped) {
+                            // Страховка: если back stack пуст (прямое открытие deep link),
+                            // возвращаемся на стартовый экран без удаления стартовой точки.
+                            navController.navigate(Routes.STARTER) {
+                                popUpTo(Routes.STARTER) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
                     }
                 )
             } else {

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import ru.chedaro.flexfit.ui.icons.FlexIcons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import ru.chedaro.flexfit.data.EntryType
 import ru.chedaro.flexfit.data.FlexRepository
 import ru.chedaro.flexfit.data.TimerEntry
+import ru.chedaro.flexfit.ui.icons.FlexIcons
 import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 
 /**
@@ -87,7 +87,7 @@ private fun EntryRow(entry: TimerEntry, onClick: () -> Unit) {
             )
             // Иконка-индикатор типа записи: часы для времени, палец для нажатий
             Icon(
-                imageVector = if (entry.type == EntryType.TIMER) FlexIcons.Timer else FlexIcons.Tapper,
+                imageVector = FlexIcons.forEntryType(entry.type),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )

@@ -12,14 +12,12 @@ import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.ui.graphics.vector.ImageVector
+import ru.chedaro.flexfit.data.EntryType
 
 /**
  * Набор иконок приложения — стандартные Material Icons из библиотеки
  * `androidx.compose.material:material-icons-extended` (официальный артефакт
  * Compose, сторонних зависимостей нет).
- *
- * Иконка для «ручного ввода числа» (линия с нулём) в Material Icons отсутствует,
- * поэтому используется `Icons.Filled.Edit`.
  */
 object FlexIcons {
 
@@ -45,4 +43,10 @@ object FlexIcons {
 
     /** Дополнительно: гантель для деталей упражнения. */
     val Fitness: ImageVector = Icons.Filled.FitnessCenter
+
+    /** Иконка по типу сохранённой записи (для окна выбора записей). */
+    fun forEntryType(type: EntryType): ImageVector = when (type) {
+        EntryType.TIMER -> Timer
+        EntryType.TAPS -> Tapper
+    }
 }
