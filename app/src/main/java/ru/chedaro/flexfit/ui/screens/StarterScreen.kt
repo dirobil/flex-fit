@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Addchart
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.TouchApp
@@ -78,7 +78,7 @@ fun StarterScreen(onNavigate: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            StarterTile(Icons.Default.Addchart, "Графики", Modifier.weight(1f)) {
+            StarterTile(Icons.Default.Insights, "Графики", Modifier.weight(1f)) {
                 onNavigate(Routes.GRAPHS)
             }
             StarterTile(Icons.Default.FitnessCenter, "Упражнения", Modifier.weight(1f)) {

@@ -32,6 +32,7 @@ import ru.chedaro.flexfit.ui.navigation.Routes
 import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 
 /**
  * Окно упражнений: список/карточки (настройка в правом верхнем углу),
@@ -57,7 +58,7 @@ fun ExercisesScreen(
             }
         }
     ) { padding ->
-        androidx.compose.foundation.layout.Box(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -98,7 +99,7 @@ fun ExercisesScreen(
             onDismissRequest = { showSettings = false },
             title = { Text("Настройки отображения") },
             text = {
-                androidx.compose.foundation.layout.Row(
+                Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
