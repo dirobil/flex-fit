@@ -59,6 +59,14 @@ fun ExerciseDetailScreen(
             return@ScreenScaffold
         }
 
+        // Режим удаления записей истории (как в окне выбора записей).
+        var deleteMode by remember { mutableStateOf(false) }
+        var showClearAllDialog by remember { mutableStateOf(false) }
+
+        val history = data.logs
+            .filter { it.exerciseId == exercise.id }
+            .sortedByDescending { it.dateEpochDay }
+
         // Контейнер занимает всю область Scaffold и принимает padding,
         // иначе контент уходит за границы экрана.
         Box(
@@ -68,13 +76,6 @@ fun ExerciseDetailScreen(
         ) {
             var nameText by remember(exercise.id) { mutableStateOf(exercise.name) }
             var stepText by remember(exercise.id) { mutableStateOf(exercise.stepPerTap.toString()) }
-            // Режим удаления записей истории (как в окне выбора записей).
-            var deleteMode by remember { mutableStateOf(false) }
-            var showClearAllDialog by remember { mutableStateOf(false) }
-
-            val history = data.logs
-                .filter { it.exerciseId == exercise.id }
-                .sortedByDescending { it.dateEpochDay }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -211,8 +212,8 @@ fun ExerciseDetailScreen(
                     ) { Text("Очистить всю историю") }
                 }
             }
-            }
-        }
+            } // конец LazyColumn
+        } // конец Box
 
         if (showClearAllDialog) {
             AlertDialog(

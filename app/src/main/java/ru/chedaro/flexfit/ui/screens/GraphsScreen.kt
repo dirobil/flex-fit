@@ -3,6 +3,7 @@ package ru.chedaro.flexfit.ui.screens
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,12 +17,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenu
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
@@ -41,6 +41,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ru.chedaro.flexfit.data.EntryType
 import ru.chedaro.flexfit.data.FlexRepository
 import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 import java.time.LocalDate
@@ -181,7 +182,6 @@ private enum class Metric(val label: String) {
     TIME("Время")
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExerciseBarChart(
     exercises: List<ru.chedaro.flexfit.data.Exercise>,
@@ -236,18 +236,26 @@ private fun ExerciseBarChart(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        // Выбор упражнения: read-only поле + выпадающий список (стабильный DropdownMenu).
+        // Клик обрабатывает Box с clickable: в этой версии Material3 у
+        // OutlinedTextField нет параметра onClick.
+        Box(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = selected.name,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Упражнение") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                trailingIcon = {
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Выбрать упражнение")
+                },
+                modifier = Modifier.fillMaxWidth()
             )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { expanded = true }
+            )
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 exercises.forEach { ex ->
                     DropdownMenuItem(
                         text = { Text(ex.name) },
@@ -261,18 +269,23 @@ private fun ExerciseBarChart(
         }
 
         // Выбор метрики: повторения (таппер/ввод) или затраченное время (таймер).
-        ExposedDropdownMenuBox(expanded = metricExpanded, onExpandedChange = { metricExpanded = it }) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = metric.label,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Метрика") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(metricExpanded) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                trailingIcon = {
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Выбрать метрику")
+                },
+                modifier = Modifier.fillMaxWidth()
             )
-            ExposedDropdownMenu(
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { metricExpanded = true }
+            )
+            DropdownMenu(
                 expanded = metricExpanded,
                 onDismissRequest = { metricExpanded = false }
             ) {
