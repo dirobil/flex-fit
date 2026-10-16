@@ -7,8 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import ru.chedaro.flexfit.ui.icons.FlexIcons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,7 +29,7 @@ import androidx.compose.ui.unit.dp
 fun ScreenScaffold(
     title: String,
     onBack: () -> Unit,
-    actions: @Composable Row.() -> Unit = {},
+    actions: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
@@ -41,7 +40,7 @@ fun ScreenScaffold(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = FlexIcons.ArrowBack,
                             contentDescription = "Назад"
                         )
                     }

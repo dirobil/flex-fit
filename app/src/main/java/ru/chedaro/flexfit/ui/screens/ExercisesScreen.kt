@@ -2,9 +2,7 @@ package ru.chedaro.flexfit.ui.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
+import ru.chedaro.flexfit.ui.icons.FlexIcons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -28,10 +26,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.chedaro.flexfit.data.FlexRepository
 import ru.chedaro.flexfit.ui.navigation.Routes
-import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 
 /**
  * Окно упражнений: список/карточки (настройка в правом верхнем углу),
@@ -53,7 +51,7 @@ fun ExercisesScreen(
         onBack = onBack,
         actions = {
             IconButton(onClick = { showSettings = true }) {
-                Icon(Icons.Default.Settings, contentDescription = "Настройки")
+                Icon(FlexIcons.Settings, contentDescription = "Настройки")
             }
         }
     ) { padding ->
@@ -87,7 +85,7 @@ fun ExercisesScreen(
                     .padding(20.dp),
                 shape = MaterialTheme.shapes.extraLarge
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Добавить упражнение")
+                Icon(FlexIcons.Add, contentDescription = "Добавить упражнение")
             }
         }
     }

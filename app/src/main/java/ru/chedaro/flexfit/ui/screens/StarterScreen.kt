@@ -14,12 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Insights
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.TouchApp
+import ru.chedaro.flexfit.ui.icons.FlexIcons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -35,8 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.chedaro.flexfit.ui.navigation.Routes
-import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 import androidx.compose.foundation.layout.sizeIn
+import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 
 /**
  * Стартовое окно: 3 крупных квадратных кнопки, полупрозрачный разделитель, 2 кнопки.
@@ -50,17 +45,17 @@ fun StarterScreen(onNavigate: (String) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        StarterTile(Icons.Default.AccessTime, "Таймер", Modifier.weight(1f)) {
+        StarterTile(FlexIcons.Timer, "Таймер", Modifier.weight(1f)) {
             onNavigate(Routes.TIMER)
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            StarterTile(Icons.Default.TouchApp, "Таппер", Modifier.weight(1f)) {
+            StarterTile(FlexIcons.Tapper, "Таппер", Modifier.weight(1f)) {
                 onNavigate(Routes.TAPPER)
             }
-            StarterTile(Icons.Default.Calculate, "Ввод", Modifier.weight(1f)) {
+            StarterTile(FlexIcons.InputNumber, "Ввод", Modifier.weight(1f)) {
                 onNavigate(Routes.INPUT)
             }
         }
@@ -78,10 +73,10 @@ fun StarterScreen(onNavigate: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            StarterTile(Icons.Default.Insights, "Графики", Modifier.weight(1f)) {
+            StarterTile(FlexIcons.Chart, "Графики", Modifier.weight(1f)) {
                 onNavigate(Routes.GRAPHS)
             }
-            StarterTile(Icons.Default.FitnessCenter, "Упражнения", Modifier.weight(1f)) {
+            StarterTile(FlexIcons.Dumbbell, "Упражнения", Modifier.weight(1f)) {
                 onNavigate(Routes.EXERCISES)
             }
         }

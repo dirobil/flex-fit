@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import ru.chedaro.flexfit.ui.icons.FlexIcons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -89,7 +88,7 @@ private fun EntryRow(entry: TimerEntry, onClick: () -> Unit) {
             )
             IconButton(onClick = { FlexRepository.removeSavedEntry(entry.id) }) {
                 Icon(
-                    imageVector = Icons.Default.Delete,
+                    imageVector = FlexIcons.Delete,
                     contentDescription = "Удалить запись",
                     tint = MaterialTheme.colorScheme.error
                 )
