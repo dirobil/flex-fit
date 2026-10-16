@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.chedaro.flexfit.ui.navigation.Routes
 import ru.chedaro.flexfit.ui.theme.FlexFitTheme
+import androidx.compose.foundation.layout.sizeIn
 
 /**
  * Стартовое окно: 3 крупных квадратных кнопки, полупрозрачный разделитель, 2 кнопки.

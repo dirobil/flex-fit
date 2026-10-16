@@ -148,9 +148,10 @@ private fun TimerDial(
             val stroke = 14.dp.toPx()
             val diameter = size.minDimension - stroke
             val topLeft = Offset((size.width - diameter) / 2f, (size.height - diameter) / 2f)
+            val trackColor = MaterialTheme.colorScheme.outlineVariant
 
             drawArc(
-                color = MaterialTheme.colorScheme.outlineVariant,
+                color = trackColor,
                 startAngle = -90f,
                 sweepAngle = 360f,
                 useCenter = false,

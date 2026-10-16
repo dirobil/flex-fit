@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import ru.chedaro.flexfit.data.FlexRepository
 import ru.chedaro.flexfit.ui.navigation.Routes
 import ru.chedaro.flexfit.ui.theme.FlexFitTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 
 /**
  * Окно упражнений: список/карточки (настройка в правом верхнем углу),

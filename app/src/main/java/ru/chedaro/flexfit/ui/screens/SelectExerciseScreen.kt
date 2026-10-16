@@ -15,6 +15,7 @@ import ru.chedaro.flexfit.data.EntryType
 import ru.chedaro.flexfit.data.FlexRepository
 import ru.chedaro.flexfit.data.TimerEntry
 import ru.chedaro.flexfit.ui.theme.FlexFitTheme
+import androidx.compose.ui.unit.dp
 
 /**
  * Окно выбора упражнения для сохранённой записи (время/количество).
