@@ -35,13 +35,12 @@ import ru.chedaro.flexfit.ui.theme.FlexFitTheme
 @Composable
 fun TapperScreen(
     onBack: () -> Unit,
-    onOpenSelectEntries: () -> Unit
+    onOpenSelectEntries: () -> Unit,
+    onOpenSelectExercise: (String) -> Unit = { onOpenSelectEntries() }
 ) {
     val data by FlexRepository.data.collectAsState()
-    // Суммарный шаг = сумма шагов всех упражнений (по умолчанию 1, если упражнений нет)
-    val totalStep = remember(data.exercises) {
-        data.exercises.sumOf { it.stepPerTap }.coerceAtLeast(1)
-    }
+    // Шаг прироста за тап хранится в настройках (единый для окна Таппер)
+    val step = data.settings.tapperStep.coerceAtLeast(1)
 
     var taps by remember { mutableIntStateOf(0) }
     var showEditDialog by remember { mutableStateOf(false) }
@@ -52,8 +51,8 @@ fun TapperScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.surface)
-                .pointerInput(Unit) {
-                    detectTapGestures { taps += totalStep }
+                .pointerInput(step) {
+                    detectTapGestures { taps = (taps + step).coerceAtLeast(0) }
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -69,7 +68,7 @@ fun TapperScreen(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "+$totalStep за нажатие",
+                    text = "+$step за нажатие",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -78,9 +77,14 @@ fun TapperScreen(
                     firstLabel = "Выбрать",
                     secondLabel = "Изменить",
                     onFirst = {
-                        // Сохраняем текущее число как выбор для окна ввода/записи
-                        FlexRepository.saveTaps(taps)
-                        onOpenSelectEntries()
+                        // Сохраняем текущее число и открываем окно выбора упражнения
+                        val entryId = FlexRepository.saveTaps(taps)
+                        if (entryId != null) {
+                            taps = 0
+                            onOpenSelectExercise(entryId)
+                        } else {
+                            onOpenSelectEntries()
+                        }
                     },
                     onSecond = { showEditDialog = true }
                 )
@@ -91,12 +95,11 @@ fun TapperScreen(
     if (showEditDialog) {
         EditTapperDialog(
             currentTaps = taps,
-            stepPerTap = totalStep,
+            stepPerTap = step,
             onDismiss = { showEditDialog = false },
             onApply = { newTaps, newStep ->
                 taps = newTaps.coerceAtLeast(0)
-                // Применяем новый шаг ко всем упражнениям
-                data.exercises.forEach { FlexRepository.setStepPerTap(it.id, newStep) }
+                FlexRepository.setTapperStep(newStep)
                 showEditDialog = false
             }
         )

@@ -1,5 +1,6 @@
 package ru.chedaro.flexfit.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -50,20 +51,25 @@ fun ExerciseDetailScreen(
             return@ScreenScaffold
         }
 
-        var nameText by remember(exercise.id) { mutableStateOf(exercise.name) }
-        var stepText by remember(exercise.id) { mutableStateOf(exercise.stepPerTap.toString()) }
-
-        val history = data.logs
-            .filter { it.exerciseId == exercise.id }
-            .sortedByDescending { it.dateEpochDay }
-
-        LazyColumn(
+        // Контейнер занимает всю область Scaffold и принимает padding,
+        // иначе контент уходит за границы экрана.
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(padding)
         ) {
+            var nameText by remember(exercise.id) { mutableStateOf(exercise.name) }
+            var stepText by remember(exercise.id) { mutableStateOf(exercise.stepPerTap.toString()) }
+
+            val history = data.logs
+                .filter { it.exerciseId == exercise.id }
+                .sortedByDescending { it.dateEpochDay }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
             item {
                 Card(
                     colors = CardDefaults.cardColors(
@@ -134,6 +140,7 @@ fun ExerciseDetailScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
             }
         }
     }

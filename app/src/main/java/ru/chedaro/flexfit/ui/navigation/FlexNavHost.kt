@@ -65,15 +65,24 @@ fun FlexNavHost(
         composable(Routes.TAPPER) {
             TapperScreen(
                 onBack = { navController.popBackStack() },
-                onOpenSelectEntries = { navController.navigate(Routes.selectEntry(EntryType.TAPS)) }
+                onOpenSelectEntries = { navController.navigate(Routes.selectEntry(EntryType.TAPS)) },
+                // Сохранённое число нажатий — сразу открываем выбор упражнения
+                onOpenSelectExercise = { entryId -> navController.navigate(Routes.selectExercise(entryId)) }
             )
         }
 
         composable(Routes.INPUT) {
             InputScreen(
                 onBack = { navController.popBackStack() },
-                // Сохраняем введённое число как выбор для окна Tapper
-                onNumberConfirmed = { value -> FlexRepository.saveTaps(value) }
+                // Сохраняем введённое число и сразу открываем окно выбора упражнения
+                onNumberConfirmed = { value ->
+                    val entryId = FlexRepository.saveTaps(value)
+                    if (entryId != null) {
+                        navController.navigate(Routes.selectExercise(entryId))
+                    } else {
+                        navController.navigate(Routes.selectEntry(EntryType.TAPS))
+                    }
+                }
             )
         }
 

@@ -51,7 +51,9 @@ data class LogEntry(
 
 /** Настройки приложения. */
 data class AppSettings(
-    val showAsCards: Boolean = true
+    val showAsCards: Boolean = true,
+    /** Шаг прироста счётчика за один тап в окне «Таппер». */
+    val tapperStep: Int = 1
 ) : Serializable
 
 /** Полное состояние данных, которое сохраняется в JSON-файл. */

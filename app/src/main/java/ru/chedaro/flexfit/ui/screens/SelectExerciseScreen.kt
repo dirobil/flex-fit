@@ -1,6 +1,7 @@
 package ru.chedaro.flexfit.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -40,38 +41,50 @@ fun SelectExerciseScreen(
     var pendingDelete by remember { mutableStateOf<String?>(null) }
 
     ScreenScaffold(title = "Выбор упражнения", onBack = onBack) { padding ->
-        if (data.exercises.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+        // ВАЖНО: контейнер обязан занять всю область и получить padding Scaffold,
+        // иначе список уходит за нижнюю границу экрана и кажется пустым.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            if (data.exercises.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Список упражнений пуст",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            FlexRepository.addExercise("Приседания")
+                            FlexRepository.addExercise("Отжимания")
+                            FlexRepository.addExercise("Планка")
+                        },
+                        shape = RoundedCornerShape(16.dp)
+                    ) { Text("Добавить упражнения") }
+                }
+            } else {
                 Text(
-                    text = "Список упражнений пуст",
+                    text = entry.displayValue + " — выберите упражнение",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        FlexRepository.addExercise("Приседания")
-                        FlexRepository.addExercise("Отжимания")
-                        FlexRepository.addExercise("Планка")
-                    },
-                    shape = RoundedCornerShape(16.dp)
-                ) { Text("Добавить упражнения") }
+                ExerciseListView(
+                    exercises = data.exercises,
+                    asCards = data.settings.showAsCards,
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 48.dp, bottom = 16.dp),
+                    onClick = { exercise -> onPicked(exercise.id) },
+                    onLongPress = { exercise -> pendingDelete = exercise.id }
+                )
             }
-        } else {
-            ExerciseListView(
-                exercises = data.exercises,
-                asCards = data.settings.showAsCards,
-                contentPadding = PaddingValues(16.dp),
-                onClick = { exercise -> onPicked(exercise.id) },
-                onLongPress = { exercise -> pendingDelete = exercise.id }
-            )
         }
     }
 

@@ -13,7 +13,6 @@ import ru.chedaro.flexfit.ui.icons.FlexIcons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -86,13 +85,12 @@ private fun EntryRow(entry: TimerEntry, onClick: () -> Unit) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            IconButton(onClick = { FlexRepository.removeSavedEntry(entry.id) }) {
-                Icon(
-                    imageVector = FlexIcons.Delete,
-                    contentDescription = "Удалить запись",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
+            // Иконка-индикатор типа записи: часы для времени, палец для нажатий
+            Icon(
+                imageVector = if (entry.type == EntryType.TIMER) FlexIcons.Timer else FlexIcons.Tapper,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

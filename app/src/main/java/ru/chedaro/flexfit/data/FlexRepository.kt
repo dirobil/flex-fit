@@ -78,15 +78,17 @@ object FlexRepository {
         }
     }
 
-    /** Сохраняет текущее значение счётчика нажатий как выбор для окна Input. */
-    fun saveTaps(taps: Int) {
-        if (taps <= 0) return
+    /**
+     * Сохраняет значение нажатий (таппер/ручной ввод) как запись для выбора упражнения.
+     * Возвращает id новой записи или null, если значение <= 0.
+     */
+    fun saveTaps(taps: Int): String? {
+        if (taps <= 0) return null
+        val entry = TimerEntry(UUID.randomUUID().toString(), EntryType.TAPS, taps = taps)
         mutate { d ->
-            d.copy(
-                savedTimerEntries = d.savedTimerEntries +
-                        TimerEntry(UUID.randomUUID().toString(), EntryType.TAPS, taps = taps)
-            )
+            d.copy(savedTimerEntries = d.savedTimerEntries + entry)
         }
+        return entry.id
     }
 
     fun removeSavedEntry(id: String) {
@@ -131,6 +133,11 @@ object FlexRepository {
 
     fun setShowAsCards(cards: Boolean) {
         mutate { d -> d.copy(settings = d.settings.copy(showAsCards = cards)) }
+    }
+
+    /** Шаг прироста счётчика за тап (окно «Таппер»), не меньше 1. */
+    fun setTapperStep(step: Int) {
+        mutate { d -> d.copy(settings = d.settings.copy(tapperStep = step.coerceAtLeast(1))) }
     }
 
     // ---------- Внутренний механизм ----------
@@ -179,6 +186,7 @@ object FlexRepository {
 
         root.put("settings", JSONObject().apply {
             put("showAsCards", d.settings.showAsCards)
+            put("tapperStep", d.settings.tapperStep)
         })
 
         return root.toString(2)
@@ -233,7 +241,8 @@ object FlexRepository {
 
             val settingsObj = root.optJSONObject("settings")
             val settings = AppSettings(
-                showAsCards = settingsObj?.optBoolean("showAsCards", true) ?: true
+                showAsCards = settingsObj?.optBoolean("showAsCards", true) ?: true,
+                tapperStep = settingsObj?.optInt("tapperStep", 1)?.coerceAtLeast(1) ?: 1
             )
 
             FlexData(exercises, entries, logs, settings)
