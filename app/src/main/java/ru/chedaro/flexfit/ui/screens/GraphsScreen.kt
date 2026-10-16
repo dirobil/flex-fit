@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -340,7 +341,7 @@ private fun ExerciseBarChart(
         ) {
             Box(
                 modifier = Modifier
-                    .width(max(contentWidthDp, 300.dp))
+                    .width(if (contentWidthDp > 300.dp) contentWidthDp else 300.dp)
                     .fillMaxHeight()
             ) {
                 BarChart(
